@@ -1,2 +1,2 @@
-interceptor: src\interceptor.js
+#interceptor: src\interceptor.js
 #loggingEnabled: true
