@@ -1,0 +1,12 @@
+{
+"AzureDriveEnabled": true,
+"AzureDriveTraceLevel": "Verbose",
+"AzureDriveBufferFlushIntervalMs": "1000",
+"AzureDriveMaxBufferSizeBytes": "1048576",
+"AzureDriveMaxLogFileSizeBytes": "2000",
+"AzureDriveMaxLogFolderSizeBytes": "20971520",
+"AzureTableEnabled": true,
+"AzureTableTraceLevel": "Verbose",
+"AzureTableBufferFlushIntervalMs": "1000",
+"AzureTableMaxBufferSizeBytes": "1048576"
+}
