@@ -38,6 +38,18 @@ In plain English:
 
     var existsSync = fs.existsSync || path.existsSync;
 
+    // install uncaughtException handler such that we can trace the unhandled exception to stderr
+    process.on('uncaughtException', function (e) {
+        
+        // only act on the uncaught exception if the app has not registered another handler
+        if (1 === process.listeners('uncaughtException').length) {
+            //fs.writeFileSync('c:\\program files\\iisnode\\www\\helloworld\\error.txt', e.toString() + e.stack);
+            logLastResort(new Date().toString() + ': unaught exception: ' + (e.stack || (new Error(e).stack)));
+            console.error('Application has thrown an uncaught exception and is terminated:\n' + (e.stack || (new Error(e).stack)));
+            process.exit(1);
+        }
+    });    
+
    // refactor process.argv to determine the app entry point and remove the interceptor parameter
 
     var appFile;
@@ -74,6 +86,7 @@ In plain English:
     var maxTotalLogSize = (process.env.IISNODE_MAXTOTALLOGFILESIZEINKB || 1024) * 1024; // iisnode.yml file logging only
     var maxLogFiles = (+process.env.IISNODE_MAXLOGFILES) || 20; // iisnode.yml file logging only
     var relativeLogDirectory = process.env.IISNODE_LOGDIRECTORY || 'iisnode'; // iisnode.yml file logging only
+    var lastResortLogFile = path.resolve(relativeLogDirectory, process.env.IISNODE_LASTRESORTLOGFILE || 'iisnode-error.txt');
     var wwwroot = path.dirname(appFile);
     var logDir = path.resolve(wwwroot, relativeLogDirectory); // iisnode.yml file logging only
     var htmlTemplate = fs.readFileSync(process.env.IISNODE_LOGGING_INDEX_TEMPLATE || path.resolve(__dirname, 'logs.template.html'), 'utf8');
@@ -190,15 +203,18 @@ In plain English:
     intercept(process.stdout, 'stdout');
     intercept(process.stderr, 'stderr');
 
-    // install uncaughtException handler such that we can trace the unhandled exception to stderr
-
-    process.on('uncaughtException', function (e) {
-        // only act on the uncaught exception if the app has not registered another handler
-        if (1 === process.listeners('uncaughtException').length) {
-            console.error('Application has thrown an uncaught exception and is terminated:\n' + (e.stack || (new Error(e).stack)));
-            process.exit(1);
-        }
-    });
+    function logLastResort(entry) {
+        try {
+            var f = fs.openSync(lastResortLogFile, 'a');
+            var b = ensureBuffer(entry);
+            fs.writeSync(f, b, 0, b.length, null);
+            fs.writeSync(f, newLine, 0, newLine.length, null);
+            fs.closeSync(f);
+        } 
+        catch (e) {
+            // empty
+        }           
+    }
 
     // override settings with environment variables
     function applySettingOverrides(settings, settingsDefaults) {
@@ -324,6 +340,20 @@ In plain English:
         }
     };
 
+    // normalize newlines and convert to Buffer
+
+    function ensureBuffer(data, encoding) {
+        if (Buffer.isBuffer(data)) {
+            return data;
+        }
+        else {
+            data = data.toString()
+                .replace(/\n+$/, '')
+                .replace(/\n/g, '\r\n');
+            return new Buffer(data, typeof encoding === 'string' ? encoding : 'utf8');
+        }
+    };        
+
     // intercept a stream
 
     function intercept(stream, type) {
@@ -333,15 +363,9 @@ In plain English:
         var currentSize;
         var currentLogCreated;
 
-        var oldWrite = stream.write;
-        function log(data, encoding) {
-            oldWrite.call(stream, data + '\n');
-        }
-
         rolloverLog(); // create a new log file
 
         stream.write = stream.end = function (data, encoding) {
-            log(data, encoding);
             if (isFileLoggingEnabled(type) || isTableLoggingEnabled(type)) {
                 var buffer = ensureBuffer(data, encoding);
 
@@ -354,18 +378,6 @@ In plain English:
                 }
             }
         };
-
-        function ensureBuffer(data, encoding) {
-            if (Buffer.isBuffer(data)) {
-                return data;
-            }
-            else {
-                data = data.toString()
-                    .replace(/\n+$/, '')
-                    .replace(/\n/g, '\r\n');
-                return new Buffer(data, typeof encoding === 'string' ? encoding : 'utf8');
-            }
-        };        
 
         function rolloverLog() {
             var now = new Date().getTime();
@@ -457,15 +469,8 @@ In plain English:
 
             addSignature(options);
 
-            log(JSON.stringify(options, null, 2));
-
             var engine = azureEndpointProtocol === 'https' ? https : http;
             var req = engine.request(options, function(res) {
-                log('Add entry: ' + res.statusCode.toString());
-                res.setEncoding('utf8');
-                var body = '';
-                res.on('data', function (chunk) { body += chunk; });
-                res.on('end', function () { log(body); });
                 if (res.statusCode == 404 && allowCreate) {
                     // lazily create the Azure Table if none exists, then retry logging
                     createTable(buffer, function (error) {
@@ -481,11 +486,11 @@ In plain English:
                     azureErrors = 0;
                 }
                 else {
+                    logLastResort(new Date().toString() + ': Error logging to the Azure Table Storage: HTTP status code: ' + res.statusCode);
                     azureErrors++;
                 }
             });
 
-            log(payload);
             req.end(payload);
         }
 
@@ -534,7 +539,10 @@ In plain English:
 
             var engine = azureEndpointProtocol === 'https' ? https : http;
             var req = engine.request(options, function(res) {
-                log('Create table: ' + res.statusCode.toString());
+                if (res.statusCode !== 201) {
+                    logLastResort(new Date().toString() + ': Error creating Azure Table to log to: HTTP status code: ' + res.statusCode);
+                }
+                
                 // assume creation succeeded or table was concurrently created from another process
                 callback(); 
             });
