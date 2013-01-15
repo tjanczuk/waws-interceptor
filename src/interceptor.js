@@ -479,7 +479,7 @@ In plain English:
             var payload = createTableEntryTemplate
                 .replace(/##DATE##/g, isoDate)
                 .replace(/##APPLICATION##/, xmlEscape(process.argv[1]))
-                .replace(/##LEVEL##/, type === 'stderr' ? 1 : 3) // stderr is Error, stdout is Information
+                .replace(/##LEVEL##/, type === 'stderr' ? 2 : 8) // stderr is TraceEventType.Error (2), stdout is TraceEventType.Information (8)
                 .replace(/##PID##/, process.pid)
                 .replace(/##COMPUTERNAME##/, xmlEscape(process.env.COMPUTERNAME))
                 .replace(/##PARTITIONKEY##/, getPartitionKey(now))
