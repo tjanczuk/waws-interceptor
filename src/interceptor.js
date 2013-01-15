@@ -458,7 +458,7 @@ In plain English:
     <m:properties>
       <d:Message>##MESSAGE##</d:Message>
       <d:ApplicationName>##APPLICATION##</d:ApplicationName>
-      <d:Level m:type="Edm.Int32">##LEVEL##</d:Level>
+      <d:Stream>##LEVEL##</d:Stream>
       <d:PartitionKey>##PARTITIONKEY##</d:PartitionKey>
       <d:RowKey>##ROWKEY##</d:RowKey>
       <d:ComputerName>##COMPUTERNAME##</d:ComputerName>
@@ -479,7 +479,7 @@ In plain English:
             var payload = createTableEntryTemplate
                 .replace(/##DATE##/g, isoDate)
                 .replace(/##APPLICATION##/, xmlEscape(process.argv[1]))
-                .replace(/##LEVEL##/, type === 'stderr' ? 2 : 8) // stderr is TraceEventType.Error (2), stdout is TraceEventType.Information (8)
+                .replace(/##LEVEL##/, type)
                 .replace(/##PID##/, process.pid)
                 .replace(/##COMPUTERNAME##/, xmlEscape(process.env.COMPUTERNAME))
                 .replace(/##PARTITIONKEY##/, getPartitionKey(now))
