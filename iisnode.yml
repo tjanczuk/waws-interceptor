@@ -1,2 +1,2 @@
-interceptor: C:\DWASFiles\Sites\logtest7\VirtualDirectory0\site\wwwroot\src\interceptor.js
+interceptor: src\interceptor.js
 #loggingEnabled: true
