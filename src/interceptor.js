@@ -44,7 +44,7 @@ In plain English:
         // only act on the uncaught exception if the app has not registered another handler
         if (1 === process.listeners('uncaughtException').length) {
             //fs.writeFileSync('c:\\program files\\iisnode\\www\\helloworld\\error.txt', e.toString() + e.stack);
-            logLastResort(new Date().toString() + ': unaught exception: ' + (e.stack || (new Error(e).stack)));
+            logLastResort('Unaught exception: ' + (e.stack || (new Error(e).stack)));
             console.error('Application has thrown an uncaught exception and is terminated:\n' + (e.stack || (new Error(e).stack)));
             process.exit(1);
         }
@@ -198,6 +198,39 @@ In plain English:
         }
     }
 
+    // log diagnostics settings if requested
+
+    if (process.env.IISNODE_LOGDIAGNOSTICSETTINGS) {
+        logLastResort('iisnode interceptor started with diagnostic settings: ' + JSON.stringify({
+            settings: settings,
+            maxLogSize: maxLogSize,
+            maxTotalLogSize: maxTotalLogSize,
+            maxLogFiles: maxLogFiles,
+            relativeLogDirectory: relativeLogDirectory,
+            lastResortLogFile: lastResortLogFile, 
+            wwwroot: wwwroot,
+            logDir: logDir,
+            htmlTemplateDefined: typeof htmlTemplate === 'string',
+            indexFile: indexFile,
+            azureAccountName: azureAccountName,
+            azureKeyDefined: Buffer.isBuffer(azureKey),
+            azureEndpointProtocol: azureEndpointProtocol,
+            azureTableName: azureTableName,
+            settingsFilePollInterval: settingsFilePollInterval,
+            settingsFile: settingsFile,
+            iisnodeYmlFile: iisnodeYmlFile,
+            azureDriveLogDirectory: azureDriveLogDirectory,
+            maxAzureErrors: maxAzureErrors,
+            iisnodeLoggingEnabled: iisnodeLoggingEnabled,
+            isFileLoggingEnabled: isFileLoggingEnabled(),
+            isTableLoggingEnabled: isTableLoggingEnabled(),
+            getMaxLogFiles: getMaxLogFiles(),
+            getMaxLogSize: getMaxLogSize(),
+            getMaxTotalLogSize: getMaxTotalLogSize(),
+            getLogDir: getLogDir()
+        }, null, 2));
+    }
+
     // intercept stdout and stderr
 
     intercept(process.stdout, 'stdout');
@@ -205,8 +238,9 @@ In plain English:
 
     function logLastResort(entry) {
         try {
+            ensureDir(relativeLogDirectory);
             var f = fs.openSync(lastResortLogFile, 'a');
-            var b = ensureBuffer(entry);
+            var b = ensureBuffer(new Date().toString() + ': ' + entry);
             fs.writeSync(f, b, 0, b.length, null);
             fs.writeSync(f, newLine, 0, newLine.length, null);
             fs.closeSync(f);
@@ -486,7 +520,7 @@ In plain English:
                     azureErrors = 0;
                 }
                 else {
-                    logLastResort(new Date().toString() + ': Error logging to the Azure Table Storage: HTTP status code: ' + res.statusCode);
+                    logLastResort('Error logging to the Azure Table Storage: HTTP status code: ' + res.statusCode);
                     azureErrors++;
                 }
             });
@@ -540,7 +574,7 @@ In plain English:
             var engine = azureEndpointProtocol === 'https' ? https : http;
             var req = engine.request(options, function(res) {
                 if (res.statusCode !== 201) {
-                    logLastResort(new Date().toString() + ': Error creating Azure Table to log to: HTTP status code: ' + res.statusCode);
+                    logLastResort('Error creating Azure Table to log to: HTTP status code: ' + res.statusCode);
                 }
 
                 // assume creation succeeded or table was concurrently created from another process
@@ -578,11 +612,8 @@ In plain English:
             }
 
             return text
-                .replace(/\"/g, '&quot;')
-                .replace(/\'/g, '&apos;')
                 .replace(/\</g, '&lt;')
-                .replace(/\>/g, '&gt;')
-                .replace(/\&/g, '&amp;');
+                .replace(/\>/g, '&gt;');
         }
 
         function getPartitionKey(now) {
