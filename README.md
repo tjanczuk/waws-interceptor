@@ -29,6 +29,7 @@ There are several aspects of the interceptor which are controlled using environm
 - `DIAGNOSTICS_AZUREDRIVEENABLED` (false) - is logging to the file system enabled  
 - `DIAGNOSTICS_AZUREDRIVEMAXLOGFILESIZEBYTES` (128KB) - maximum size of a single log file before a new one is created
 - `DIAGNOSTICS_AZUREDRIVEMAXLOGFOLDERSIZEBYTES` (1MB) - maximum size of all log files combined before old ones are removed
+- `IISNODE_MAXLOGFILES` (20) - maximum number of log files before old ones are removed
 - `DIAGNOSTICS_AZURETABLEENABLED` (false) - is logging to Azure Table Storage enabled
 - `DIAGNOSTICS_MAXAZURETABLEERRORS` (10) - maximum number of consecutive errors when calling Azure Table Storage REST APIs before Azure Table Storage logging is disabled for the lifetime of the node.exe process
 - `DIAGNOSTICS_LOGGINGTABLENAME` ('WAWSAppLogTable') - Azure Table Storage table name to log to

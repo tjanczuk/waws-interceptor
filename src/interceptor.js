@@ -43,7 +43,6 @@ In plain English:
         
         // only act on the uncaught exception if the app has not registered another handler
         if (1 === process.listeners('uncaughtException').length) {
-            //fs.writeFileSync('c:\\program files\\iisnode\\www\\helloworld\\error.txt', e.toString() + e.stack);
             logLastResort('Unaught exception: ' + (e.stack || (new Error(e).stack)));
             console.error('Application has thrown an uncaught exception and is terminated:\n' + (e.stack || (new Error(e).stack)));
             process.exit(1);
@@ -66,16 +65,16 @@ In plain English:
     // establish logging parameters and settings
 
     var settingsDefaults = { // defaults for settings from the portal
-      "AzureDriveEnabled": false,
-      "AzureDriveTraceLevel": "Verbose",
-      "AzureDriveBufferFlushIntervalMs": "1000",
-      "AzureDriveMaxBufferSizeBytes": "1048576",
-      "AzureDriveMaxLogFileSizeBytes": "2000",
-      "AzureDriveMaxLogFolderSizeBytes": "20971520",
-      "AzureTableEnabled": false,
-      "AzureTableTraceLevel": "Verbose",
-      "AzureTableBufferFlushIntervalMs": "1000",
-      "AzureTableMaxBufferSizeBytes": "1048576"
+      AzureDriveEnabled: false,
+      AzureDriveTraceLevel: 'Verbose', // not used in node.js
+      AzureDriveBufferFlushIntervalMs: 1000, // not used in node.js
+      AzureDriveMaxBufferSizeBytes: 1048576, // not used in node.js
+      AzureDriveMaxLogFileSizeBytes: 128 * 1024,
+      AzureDriveMaxLogFolderSizeBytes: 1024 * 1024,
+      AzureTableEnabled: false,
+      AzureTableTraceLevel: 'Verbose', // not used in node.js
+      AzureTableBufferFlushIntervalMs: 1000, // not used in node.js
+      AzureTableMaxBufferSizeBytes: 1024 * 1024 // not used in node.js
     };
 
     var settings = {};
