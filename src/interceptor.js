@@ -111,7 +111,7 @@ In plain English:
         azureEndpointProtocol = getKeyOrDefault('DefaultEndpointsProtocol', azureEndpointProtocol);
 
         function getKeyOrDefault(key, defaultValue) {
-            var regex = RegEx(key + '=([^;]+)');
+            var regex = new RegExp(key + '=([^;]+)');
             var match = regex.exec(process.env.CUSTOMCONNSTR_CLOUD_STORAGE_ACCOUNT);
             return match ? match[1] : defaultValue;
         }
@@ -542,7 +542,7 @@ In plain English:
                 if (res.statusCode !== 201) {
                     logLastResort(new Date().toString() + ': Error creating Azure Table to log to: HTTP status code: ' + res.statusCode);
                 }
-                
+
                 // assume creation succeeded or table was concurrently created from another process
                 callback(); 
             });
