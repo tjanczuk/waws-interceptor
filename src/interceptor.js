@@ -610,7 +610,7 @@ In plain English:
                 '.',
                 leftPad(date.getUTCMilliseconds(), 3),
                 'Z'
-            ];
+            ]; 
 
             return components.join('');
         }
