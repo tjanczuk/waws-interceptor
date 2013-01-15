@@ -561,8 +561,6 @@ In plain English:
                 options.headers['x-ms-date'] + '\n' +
                 '/' + azureAccountName + options.path;
 
-            log(stringToSign);
-
             var hmac = crypto.createHmac('sha256', azureKey);
             hmac.update(stringToSign);
             var signature = hmac.digest('base64');
