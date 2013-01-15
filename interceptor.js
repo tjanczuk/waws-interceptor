@@ -27,7 +27,7 @@ In plain English:
 */
 
 (function () {
-return;
+
     var path = require('path')
         , fs = require('fs')
         , crypto = require('crypto')
@@ -50,7 +50,7 @@ return;
     });
 
     process.argv = newArgs;    
-
+return;
     // establish logging parameters and settings
 
     var settingsDefaults = { // defaults for settings from the portal
