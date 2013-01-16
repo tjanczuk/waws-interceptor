@@ -94,7 +94,7 @@ In plain English:
     var azureKey = process.env.IISNODE_LOGGING_STORAGE_KEY;
     var azureEndpointProtocol = process.env.IISNODE_LOGGING_ENDPOINT_PROTOCOL || 'https';
     var azureTableName = process.env.DIAGNOSTICS_LOGGINGTABLENAME || 'WAWSAppLogTable';
-    var settingsFilePollInterval = process.env.IISNODE_LOGGING_SETTINGS_POLL_INTERVAL || 5000;
+    var settingsFilePollInterval = process.env.DIAGNOSTICS_SETTINGS_POLL_INTERVAL || 5000;
     var settingsFile = path.resolve(wwwroot, process.env.DIAGNOSTICS_LOGGINGSETTINGSFILE || '..\\diagnostics\\settings.json');
     var iisnodeYmlFile = path.resolve(wwwroot, process.env.IISNODE_LOGGING_IISNODE_YML_FILE || 'iisnode.yml');
     var azureDriveLogDirectory = path.resolve(wwwroot, process.env.DIAGNOSTICS_AZUREDRIVELOGDIRECTORY || '..\\..\\LogFiles\\Application');
