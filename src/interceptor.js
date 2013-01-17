@@ -101,6 +101,7 @@ In plain English:
     var azureErrors = 0;
     var maxAzureErrors = process.env.DIAGNOSTICS_MAXAZURETABLEERRORS || 10;
     var newLine = new Buffer('\r\n');
+    var azureDriveTurnoffPeriod = +process.env.DIAGNOSTICS_AZUREDRIVETURNOFFPERIOD || 12 * 60 * 60 * 1000; // 12h in ms
 
     // process Azure table storage credentials
 
@@ -156,8 +157,26 @@ In plain English:
         var modifiedTime;
         function checkSettingsFile() {
             fs.stat(settingsFile, function (error, stat) {
-                if (!error && stat.mtime.getTime() != modifiedTime && tryReadSettingsFile()) {
-                    modifiedTime = stat.mtime.getTime();
+                if (!error) {
+                    if (stat.mtime.getTime() != modifiedTime && tryReadSettingsFile()) {
+                        modifiedTime = stat.mtime.getTime();
+                    }
+
+                    if (settings.AzureDriveEnabled && (new Date().getTime() - stat.mtime.getTime()) > azureDriveTurnoffPeriod) {
+                        settings.AzureDriveEnabled = false;
+                        applySettingOverrides(settings, settingsDefaults);
+                        try {
+                            var fileSettings = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+                            if (fileSettings.AzureDriveEnabled) {
+                                fileSettings.AzureDriveEnabled = false;
+                                fs.writeFileSync(settingsFile, JSON.stringify(fileSettings));
+                                logLastResort('Disabling Azure Drive logging after ' + azureDriveTurnoffPeriod + 'ms since it was enabled');
+                            }
+                        }
+                        catch (e) {
+                            // empty
+                        }
+                    }
                 }
 
                 setTimeout(checkSettingsFile, settingsFilePollInterval);
