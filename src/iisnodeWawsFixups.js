@@ -1,12 +1,13 @@
-var fs = require('fs')
-	, path = require('path');
-	existsSync = fs.existsSync || path.existsSync;
+var fs = require('fs');
 
-if (!existsSync(process.argv[2])) {
-	throw new Error('The first argument must be the full filename of the iisnode_schema.xml file.');
-}
+// If this is x64 node on x64 system, use %windir%\system32 directory.
+// Otherwise assume x86 node on x64 system and use %windir%\sysinternal directory to 
+// avoid WOW file system redirection.
+var schemaFile = process.env.windir 
+	+ (process.arch === 'x64' ? '\\system32' : '\\sysnative')
+	+ '\\inetsrv\\config\\schema\\iisnode_schema.xml';
 
-var schema = fs.readFileSync(process.argv[2], 'utf8');
+var schema = fs.readFileSync(schemaFile, 'utf8');
 
 schema = schema
 
@@ -26,4 +27,4 @@ schema = schema
 	.replace('name="debuggingEnabled" type="bool" defaultValue="true"',
 		'name="debuggingEnabled" type="bool" defaultValue="false"');
 
-fs.writeFileSync(process.argv[2], schema);
+fs.writeFileSync(schemaFile, schema);
