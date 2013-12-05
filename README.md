@@ -24,7 +24,18 @@ interceptor: src\interceptor.js
 
 (This step will not be required once the new interceptor is part of WAWS image).
 
-There are several aspects of the interceptor which are controlled using environment variables, which can be set using the app settings section of the Windows Azure Web Sites portal or the Azure CLI. Here is the list of setting:
+**Note:**
+
+If `loggingEnabled: true` is set in iisnode.yml
+
+1. logs will be written to directory specified by `IISNODE_LOGDIRECTORY` setting (defaults to 'iisnode', please see below) AND
+2. `DIAGNOSTICS_AZUREDRIVEENABLED` and `DIAGNOSTICS_AZUREDRIVELOGDIRECTORY` settings will be ignored.
+
+If you want logs to be written to `DIAGNOSTICS_AZUREDRIVELOGDIRECTORY`, set `loggingEnabled: false` or remove this property from iisnode.yml and make sure `DIAGNOSTICS_AZUREDRIVEENABLED` is set using PORTAL or Azure CLI.
+
+**Settings:**
+
+There are several aspects of the interceptor which are controlled using environment variables, which can be set using the app settings section of the Windows Azure Web Sites portal or the Azure CLI. Here is the list of settings:
 
 - `DIAGNOSTICS_AZUREDRIVEENABLED` (false) - is logging to the file system enabled  
 - `DIAGNOSTICS_AZUREDRIVEMAXLOGFILESIZEBYTES` (128KB) - maximum size of a single log file before a new one is created
@@ -36,7 +47,7 @@ There are several aspects of the interceptor which are controlled using environm
 - `DIAGNOSTICS_LOGGINGSETTINGSFILE` ('..\diagnostics\settings.json') - location of the settings.json file relative to wwwroot
 - `DIAGNOSTICS_SETTINGS_POLL_INTERVA` (5000) - interval in milliseconds at which the settings.json file is checked for changes
 - `DIAGNOSTICS_AZUREDRIVELOGDIRECTORY` ('..\..\LogFiles\Application') - location of lof file directory relative to wwwroot
-- `IISNODE_LOGDIRECTORY` ('..\..\LogFiles\iisnode') - legacy location of log files
+- `IISNODE_LOGDIRECTORY` ('iisnode') - legacy location of log files (relative to wwwroot).
 - `IISNODE_LASTRESORTLOGFILE` ('iisnode-error.txt') - name of the 'last resort' log file relative to `IISNODE_LOGDIRECTORY`; this is where iisnode will save informaiton about errors in the logging infrastructure itself, on a best effort basis
 - `IISNODE_LOGDIAGNOSTICSETTINGS` (not set by default) - if set, iisnode interceptor.js will log the effective diagnostics settings to the `IISNODE_LASTRESORTLOGFILE` on startup of the node.exe process; note the effective settings may change in the lifetime of the node.exe process as a result of modifications to the `DIAGNOSTICS_LOGGINGSETTINGSFILE` file
 
