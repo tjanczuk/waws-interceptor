@@ -36,7 +36,7 @@ There are several aspects of the interceptor which are controlled using environm
 - `DIAGNOSTICS_LOGGINGSETTINGSFILE` ('..\diagnostics\settings.json') - location of the settings.json file relative to wwwroot
 - `DIAGNOSTICS_SETTINGS_POLL_INTERVA` (5000) - interval in milliseconds at which the settings.json file is checked for changes
 - `DIAGNOSTICS_AZUREDRIVELOGDIRECTORY` ('..\..\LogFiles\Application') - location of lof file directory relative to wwwroot
-- `IISNODE_LOGDIRECTORY` ('..\..\LogFiles\iisnode') - legacy location of log files
+- `IISNODE_LOGDIRECTORY` ('iisnode') - legacy location of log files (relative to wwwroot).
 - `IISNODE_LASTRESORTLOGFILE` ('iisnode-error.txt') - name of the 'last resort' log file relative to `IISNODE_LOGDIRECTORY`; this is where iisnode will save informaiton about errors in the logging infrastructure itself, on a best effort basis
 - `IISNODE_LOGDIAGNOSTICSETTINGS` (not set by default) - if set, iisnode interceptor.js will log the effective diagnostics settings to the `IISNODE_LASTRESORTLOGFILE` on startup of the node.exe process; note the effective settings may change in the lifetime of the node.exe process as a result of modifications to the `DIAGNOSTICS_LOGGINGSETTINGSFILE` file
 
